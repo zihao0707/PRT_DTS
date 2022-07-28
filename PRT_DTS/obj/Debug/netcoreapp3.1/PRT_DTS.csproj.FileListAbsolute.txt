@@ -1,0 +1,16 @@
+D:\POME瑞精\PRT_DTS\PRT_DTS\bin\Debug\netcoreapp3.1\PRT_DTS.exe
+D:\POME瑞精\PRT_DTS\PRT_DTS\bin\Debug\netcoreapp3.1\PRT_DTS.deps.json
+D:\POME瑞精\PRT_DTS\PRT_DTS\bin\Debug\netcoreapp3.1\PRT_DTS.runtimeconfig.json
+D:\POME瑞精\PRT_DTS\PRT_DTS\bin\Debug\netcoreapp3.1\PRT_DTS.runtimeconfig.dev.json
+D:\POME瑞精\PRT_DTS\PRT_DTS\bin\Debug\netcoreapp3.1\PRT_DTS.dll
+D:\POME瑞精\PRT_DTS\PRT_DTS\bin\Debug\netcoreapp3.1\PRT_DTS.pdb
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.csproj.AssemblyReference.cache
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.Form1.resources
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.csproj.GenerateResource.cache
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.GeneratedMSBuildEditorConfig.editorconfig
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.AssemblyInfoInputs.cache
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.AssemblyInfo.cs
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.csproj.CoreCompileInputs.cache
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.dll
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.pdb
+D:\POME瑞精\PRT_DTS\PRT_DTS\obj\Debug\netcoreapp3.1\PRT_DTS.genruntimeconfig.cache
