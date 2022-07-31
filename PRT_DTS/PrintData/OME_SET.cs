@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PRT_DTS.PrintData
 {
-    class OME_SET
+    public class OME_SET
     {
         public string rules_code { get; set; }
         public string label_code { get; set; }

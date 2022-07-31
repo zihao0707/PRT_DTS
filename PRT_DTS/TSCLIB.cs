@@ -79,26 +79,26 @@ namespace PRT_DTS
             closeport();
         }
 
-        public void Print_LabelsData(string data, DataTable prt)
+        public void Print_LabelsData(PRT01_0000 pRT)
         {
-            DataTable dataTable = JsonConvert.DeserializeObject<DataTable>(data);
+            DataTable dataTable = JsonConvert.DeserializeObject<DataTable>(pRT.PrintData);
+            openport(pRT.PrintName);//印表機名稱
+            clearbuffer();
 
-            switch (prt.LabelCode)
+            switch (pRT.LabelCode)
             {
-
                 case "FOMAT"://量治具標籤作業
                     List<string> QrCode = Get_DataTableValue_list(dataTable, "qrcode");
                     foreach (var value in QrCode)
                     {
-                        FOMAT_Print( value);
+                        FOMAT_Print(value);
                     }
-
                     break;
 
                 case "IMG"://展會圖片
 
                     IMG_Print();
-                    BARCODE(dataTable, prt.LabelCode);
+                    BARCODE(dataTable, pRT.LabelCode);
                     break;
 
                 case "SET"://把號
@@ -108,52 +108,49 @@ namespace PRT_DTS
                     int prt_cnt = new Comm().String_ParseInt32(Get_DataTableValue(dataTable, "prt_cnt"));
                     for (int i = 1; i <= prt_cnt; i++)
                     {
-                        int Oldprt_cnt = getPrt_cnt有編碼格式(insDate, Get_DataTableValue(dataTable, "rules_code"), prt.LabelCode, i);
+                        int Oldprt_cnt = getPrt_cnt有編碼格式(insDate, Get_DataTableValue(dataTable, "rules_code"), pRT.LabelCode, i);
 
-                        string Key = Get_RulesKey(Get_DataTableValue(dataTable, "rules_code"),
-                                    Oldprt_cnt);
+                        string Key = Get_RulesKey(Get_DataTableValue(dataTable, "rules_code"), Oldprt_cnt);
                         Key = Key.Replace(" ", "");
-                        SET_Print(new OME_SET()
-                        {
-                            rules_code = Key, //格式'R' + yymmdd + 0000
-                        });
+                        //格式'R' + yymmdd + 0000
+                        SET_Print(Key, pRT.PrintName);
                     }
                     break;
 
                 case "QC"://檢驗標籤
-                    QC_Print(new OME_QC()
+                    QC_Print(pRT.PrintName, new OME_QC()
                     {
-                        TZ = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " TZ  ")),
-                        TW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " TW  ")),
-                        DZ = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " DZ  ")),
-                        DW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " DW  ")),
-                        W1 = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " W1  ")),
-                        W2 = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " W2  ")),
-                        BG = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " BG  ")),
-                        LH = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " LH  ")),
-                        BW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " BW  ")),
-                        BGR_UP = Get_DataTableValue(dataTable, " BGR_UP "),
-                        BGR_DOWN = Get_DataTableValue(dataTable, " BGR_DOWN "),
-                        FC = Get_DataTableValue(dataTable, " FC  "),
-                        DG_A = Get_DataTableValue(dataTable, " DG_A"),
-                        DG_B = Get_DataTableValue(dataTable, " DG_B"),
-                        SCH = Get_DataTableValue(dataTable, " SCH"),
-                        Z1 = Get_DataTableValue(dataTable, " Z1 "),
-                        Z2 = Get_DataTableValue(dataTable, " Z2 "),
-                        PA = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " PA ")),
-                        AH = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, " AH ")),
-                        S1_level = Get_DataTableValue(dataTable, " S1_level "),
-                        bar_code = Get_DataTableValue(dataTable, " bar_code "),
-                        qr_code = Get_DataTableValue(dataTable, " qr_code  "),
-                        pro_code = Get_DataTableValue(dataTable, " pro_code "),
-                        LG = Get_DataTableValue(dataTable, " LG  "),
-                        GS = Get_DataTableValue(dataTable, " GS  "),
-                        AS = Get_DataTableValue(dataTable, " AS  "),
-                        M = Get_DataTableValue(dataTable, " M   "),
-                        N = Get_DataTableValue(dataTable, " N   "),
-                        SHUL = Get_DataTableValue(dataTable, " SHUL "),
-                        second_level = Get_DataTableValue(dataTable, " second_level"),
-                        pp_level = Get_DataTableValue(dataTable, " pp_level "),
+                        TZ = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "TZ")),
+                        TW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "TW")),
+                        DZ = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "DZ")),
+                        DW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "DW")),
+                        W1 = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "W1")),
+                        W2 = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "W2")),
+                        BG = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "BG")),
+                        LH = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "LH")),
+                        BW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "BW")),
+                        PA = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "PA")),
+                        AH = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "AH")),
+                        BGR_UP = Get_DataTableValue(dataTable, "BGR_UP"),
+                        BGR_DOWN = Get_DataTableValue(dataTable, "BGR_DOWN"),
+                        FC = Get_DataTableValue(dataTable, "FC"),
+                        DG_A = Get_DataTableValue(dataTable, "DG_A"),
+                        DG_B = Get_DataTableValue(dataTable, "DG_B"),
+                        SCH = Get_DataTableValue(dataTable, "SCH"),
+                        Z1 = Get_DataTableValue(dataTable, "Z1"),
+                        Z2 = Get_DataTableValue(dataTable, "Z2"),
+                        S1_level = Get_DataTableValue(dataTable, "S1_level"),
+                        bar_code = Get_DataTableValue(dataTable, "bar_code"),
+                        qr_code = Get_DataTableValue(dataTable, "qr_code"),
+                        pro_code = Get_DataTableValue(dataTable, "pro_code"),
+                        LG = Get_DataTableValue(dataTable, "LG"),
+                        GS = Get_DataTableValue(dataTable, "GS"),
+                        AS = Get_DataTableValue(dataTable, "AS"),
+                        M = Get_DataTableValue(dataTable, "M"),
+                        N = Get_DataTableValue(dataTable, "N"),
+                        SHUL = Get_DataTableValue(dataTable, "SHUL"),
+                        second_level = Get_DataTableValue(dataTable, "second_level"),
+                        pp_level = Get_DataTableValue(dataTable, "pp_level"),
                         A19 = Get_DataTableValue(dataTable, "A19"),
                         A01 = Get_DataTableValue(dataTable, "A01"),
                     });
@@ -164,32 +161,8 @@ namespace PRT_DTS
         }
         /*----------------測試區向下-----------------*/
 
-        private string Get_DataTableValue(DataTable data, string searchName)
+        public void QC_Print(string print_name, OME_QC qC) //下LINQ查詢語法抓prt01
         {
-            List<string> colItem = data.Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToList();
-            string colName = searchName.Trim();
-            return colItem.Where(x => x == colName).Any() ?
-                data.AsEnumerable().Select(row => row[colName].ToString()).FirstOrDefault()
-                : "";
-        }
-
-        private List<string> Get_DataTableValue_list(DataTable data, string searchName)
-        {
-            List<string> colItem = data.Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToList();
-            string colName = searchName.Trim();
-            List<string> list = colItem.Where(x => x == colName).Any() ?
-                data.AsEnumerable().Select(row => row[colName].ToString()).ToList()
-                : new List<string>();
-            return list;
-        }
-
-
-        public void QC_Print(OME_QC qC) //下LINQ查詢語法抓prt01
-        {
-
-            //openport(info.PrinerName);//印表機名稱
-
-            clearbuffer();
             string QrCode = qC.qr_code;
             string BARCODE = qC.bar_code;
             string FormatCommand = @$"
@@ -241,11 +214,9 @@ namespace PRT_DTS
             closeport();
         }
 
-        public void SET_Print(OME_SET sET) //下LINQ查詢語法抓prt01
+        public void SET_Print(string rules_code, string PrinerName)
         {
-            string QrCode = sET.rules_code;
-            //openport(info.PrinerName);//印表機名稱
-            clearbuffer();
+            string QrCode = rules_code;
 
             string FormatCommand = @$"
                 SIZE 60 mm, 75 mm
@@ -258,12 +229,14 @@ namespace PRT_DTS
             sendcommand(FormatCommand);//设置相对起点
             printlabel("1", "1");
             closeport();
+
+
+
         }
 
-        public void FOMAT_Print( string value) //量至距
+        public void FOMAT_Print(string value) //量至距
         {
-            ////openport(info.PrinerName);//印表機名稱//印表機名稱
-            clearbuffer();
+
             string FormatCommand = @$" SIZE 101 mm, 50mm
                 GAP 0,0
                 SPEED 1
@@ -281,13 +254,11 @@ namespace PRT_DTS
 
             sendcommand(FormatCommand);//设置相对起点
             printlabel("1", "1");
-            closeport();         
+            closeport();
         }
 
         public void IMG_Print() //下LINQ查詢語法抓prt01
         {
-            ////openport(info.PrinerName);//印表機名稱//印表機名稱
-            clearbuffer();
 
             downloadpcx(@"C:\Users\howard.chu\Desktop\img\TEST1.pcx", "BMP.PCX");
             string FormatCommand = @$"
@@ -313,9 +284,6 @@ namespace PRT_DTS
 
             string DateCode = Get_RulesKey("yyyyMMdd+0000", Oldprt_cnt);
             DateCode = DateCode.Replace(" ", "");
-
-            ////openport(info.PrinerName);//印表機名稱 //印表機名稱
-            clearbuffer();
 
             string FormatCommand = @$"
                 SIZE 101 mm, 101mm
@@ -352,7 +320,7 @@ namespace PRT_DTS
 
         public void Test_Print()
         {
-            ////openport(info.PrinerName);//印表機名稱 //印表機名稱
+
             string Key = Get_RulesKey("'PUME'+yymmdd+'-'+0000", 1);
             string FormatCommand = @$"
                     QRCODE 430, 280, L, 8, A, 0, M2, X250, J5, ""{Key}""
@@ -364,6 +332,27 @@ namespace PRT_DTS
             printlabel("1", "1");
             closeport();
         }
+
+
+        private string Get_DataTableValue(DataTable data, string searchName)
+        {
+            List<string> colItem = data.Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToList();
+            string colName = searchName.Trim();
+            return colItem.Where(x => x == colName).Any() ?
+                data.AsEnumerable().Select(row => row[colName].ToString()).FirstOrDefault()
+                : "";
+        }
+
+        private List<string> Get_DataTableValue_list(DataTable data, string searchName)
+        {
+            List<string> colItem = data.Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToList();
+            string colName = searchName.Trim();
+            List<string> list = colItem.Where(x => x == colName).Any() ?
+                data.AsEnumerable().Select(row => row[colName].ToString()).ToList()
+                : new List<string>();
+            return list;
+        }
+
 
         private string Get_RulesKey(string rules, int index)
         {
@@ -516,7 +505,7 @@ namespace PRT_DTS
             return a;
         }
 
-        public int getPrt_cnt有編碼格式(string ins_date, string rules_code, string label_code, int RunNumber)
+        public int getPrt_cnt有編碼格式(string ins_date, string rules_code, string LabelCode, int RunNumber)
         {
             rules_code = rules_code.Replace("'", "");
             Comm comm = new Comm();
@@ -526,7 +515,7 @@ namespace PRT_DTS
                                         SELECT @Columns = COALESCE(@Columns + ',' + 
 				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,''), 
 				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,'')) 
-                                        from PRT02_0000 where ins_date = {ins_date} and (print_data like '%{label_code}%' 
+                                        from PRT02_0000 where ins_date = {ins_date} and (print_data like '%{LabelCode}%' 
                                                                 and REPLACE(print_data, '''' ,'') like '%{rules_code}%') ;
                                         SET @JsonValue = '['+ @Columns+']'; -- 將Json 
 
@@ -541,7 +530,7 @@ namespace PRT_DTS
             return Oldprt_cnt;
         }
 
-        public int getPrt_cnt無編碼格式(string ins_date, string label_code)
+        public int getPrt_cnt無編碼格式(string ins_date, string LabelCode)
         {
             Comm comm = new Comm();
             string sSql = @$" DECLARE @Columns VARCHAR(MAX)
@@ -550,7 +539,7 @@ namespace PRT_DTS
                                         SELECT @Columns = COALESCE(@Columns + ',' + 
 				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,''), 
 				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,'')) 
-                                        from PRT02_0000 where ins_date = {ins_date} and print_data like '%{label_code}%' ;
+                                        from PRT02_0000 where ins_date = {ins_date} and print_data like '%{LabelCode}%' ;
                                         SET @JsonValue = '['+ @Columns+']'; -- 將Json 
 
                                         SELECT sum(prt_cnt) as prt_cnt FROM OPENJSON(@JsonValue)

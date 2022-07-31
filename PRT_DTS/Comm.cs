@@ -333,6 +333,7 @@ namespace PRT_DTS
             return NewValue;
         }
 
+
         /// <summary>
         /// 取得小數點位數
         /// </summary>

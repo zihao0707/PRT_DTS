@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PRT_DTS.PrintData
 {
-    class PRT01_0000
+   public class PRT01_0000
     {
         public int Prt0100001 { get; set; }
         public string PrtType { get; set; }

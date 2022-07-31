@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PRT_DTS.PrintData
 {
-    class OME_QC
+    public class OME_QC
     {
         public string TZ { get; set; }
         public string TW { get; set; }

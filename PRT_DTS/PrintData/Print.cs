@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PRT_DTS.PrintData
 {
-    class Print
+    public class Print
     {
         public Print _print { get; set; }
 
