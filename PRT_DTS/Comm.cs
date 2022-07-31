@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PRT_DTS.PrintData;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -89,6 +90,30 @@ namespace PRT_DTS
             }
         }
 
+        public bool Insert_DB_Table(PRT02_0000 pData, string sTable, string sConnect)
+        {
+
+            if (pData.prt02_0000.Any())
+            {
+
+                using SqlConnection con_db = Set_DBConnection(sConnect);
+                con_db.Open();
+                SqlBulkCopy bulk = new SqlBulkCopy(con_db);
+                bulk.DestinationTableName = sTable;
+                try
+                {
+                    bulk.WriteToServer((IDataReader)pData);
+                    con_db.Close();
+                }
+                catch (Exception ex)
+                {
+                    //錯誤處理 throw;
+                    return false;
+                }
+            }
+            return true;
+        }
+
         /// <summary>
         ///測試與資料庫做連線
         /// </summary>
@@ -140,6 +165,24 @@ namespace PRT_DTS
                 data.AsEnumerable().Select(row => row[colName].ToString()).ToList()
                 : new List<string>();
             return list;
+        }
+
+
+
+        /// <summary>
+        /// 取得新的GUID
+        /// </summary>
+        /// <param name="Type">
+        /// D : 36 個字符 (同等 "")
+        /// N : 32 個字符
+        /// B : 38 個字符（大括號）
+        /// P : 38 個字符（括號）
+        /// X : 68 個字符（十六進制）
+        /// </param>
+        /// <returns></returns>
+        public string Get_NewGUID(string Type = "N")
+        {
+            return Guid.NewGuid().ToString(Type);
         }
 
         //組合流水號 (範例格式'R' + yymmdd + 0000)

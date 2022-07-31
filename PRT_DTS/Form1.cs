@@ -60,9 +60,13 @@ namespace PRT_DTS
             }
 
             new TSCLIB().Print_LabelsData(prt);
-
+            DataTable insData = new DataTable();
+           var result = new PRT02_0000().insPRT02_0000(prt);
+           new Comm().Insert_DB_Table(result,"PRT02_0000","MES");
             return "列印完畢";
         }
+
+       
 
         private void button2_Click(object sender, EventArgs e)
         {

@@ -91,7 +91,7 @@ namespace PRT_DTS
                                         //Call openport(“LPT1”)直接開啟LPT1 傳輸埠
                                         //Call openport(“USB”)直接開啟USB 傳輸埠
                 clearbuffer();
-
+                /*--------標籤種類向下-----------*/
                 switch (pRT.LabelCode)
                 {
                     case "FOMAT"://量治具標籤作業
@@ -121,9 +121,9 @@ namespace PRT_DTS
                 }
             }
             catch (Exception ex) { _error = ex.Message; }
-            /*--------執行向上-----------*/
+            /*--------標籤種類向上-----------*/
         }
-        /*----------------測試區向下-----------------*/
+        /*----------------列印格式區向下-----------------*/
 
         public void QC_Print(string print_name, OME_QC qC) //下LINQ查詢語法抓prt01
         {
