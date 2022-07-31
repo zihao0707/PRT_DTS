@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,13 +15,13 @@ namespace PRT_DTS
         {
             IniFile ini = new IniFile("./setting.ini");
             //讀取 Ini 中 Num 的值 
-            _DbConntion_ERP = ini.ReadIni("config", "MES");
+            _DbConntion_MES = ini.ReadIni("config", "MES");
             //_DbConntion_SCM = ini.ReadIni("config", "WMS");
             //_DbConntion_ERP = "Data Source=218.35.166.35;Initial Catalog=WMS_CloudPOC15_RFSOFT;Persist Security Info=True;User ID=sa;Password=1208jsh";
             //_DbConntion_SCM = "Data Source=218.35.166.35;Initial Catalog=SCM_CloudDEV;Persist Security Info=True;User ID=sa;Password=1208jsh";
         }
-        public string _DbConntion_ERP { get; set; }
-        public string _DbConntion_SCM { get; set; }
+        public string _DbConntion_MES { get; set; }
+        public string _DbConntion_WMS { get; set; }
 
         /// <summary>
         /// 與資料庫做連線
@@ -32,11 +33,11 @@ namespace PRT_DTS
             switch (DBname)
             {
                 case "MES":
-                    connection = Value_解密(_DbConntion_SCM);
+                    connection = Value_解密(_DbConntion_MES);
                     break;
-                case "SCM":
-                    connection = Value_解密(_DbConntion_ERP);
-                    break;
+                //case "WMS":
+                //    connection = Value_解密(_DbConntion_WMS);
+                //    break;
             }
 
             SqlConnection Connection_Db = new SqlConnection(connection);
@@ -104,6 +105,7 @@ namespace PRT_DTS
             catch { return false; }
         }
 
+        //取得配對碼
         public List<string> GetMACAddress()
         {
             List<string> GetMACA = new List<string>();
@@ -115,6 +117,131 @@ namespace PRT_DTS
                 GetMACA.Add(adapter.GetPhysicalAddress().ToString());
             }
             return GetMACA;
+        }
+
+        //將DataTable轉換為string
+        //searchName 要從DataTable取出的欄位
+        public string Get_DataTableValue(DataTable data, string searchName)
+        {
+            List<string> colItem = data.Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToList();
+            string colName = searchName.Trim();
+            return colItem.Where(x => x == colName).Any() ?
+                data.AsEnumerable().Select(row => row[colName].ToString()).FirstOrDefault()
+                : "";
+        }
+
+        //將DataTable轉換為list
+        //searchName 要從DataTable取出的欄位
+        public List<string> Get_DataTableValue_list(DataTable data, string searchName)
+        {
+            List<string> colItem = data.Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToList();
+            string colName = searchName.Trim();
+            List<string> list = colItem.Where(x => x == colName).Any() ?
+                data.AsEnumerable().Select(row => row[colName].ToString()).ToList()
+                : new List<string>();
+            return list;
+        }
+
+        //組合流水號 (範例格式'R' + yymmdd + 0000)
+        //rules 流水號格式
+        //index 從序號幾開始
+        public string Get_RulesKey(string rules, int index)
+        {
+            List<string> Item = rules.Split('+').ToList();
+            string result = "";
+            foreach (string str in Item)
+            {
+                if (str.Contains("'"))
+                {
+                    result += str.Replace("'", "");
+                    continue;
+                }
+
+                int outResult;
+                if (int.TryParse(str, out outResult))
+                {
+                    string Key = Get_ScrNo(index, str);
+                    result += Key;
+                    continue;
+                }
+
+                string date = DateTime.Now.ToString(str);
+                result += date;
+            }
+            return result;
+        }
+        //組合流水序號數字編號部分
+        public string Get_ScrNo(int key, string str)
+        {
+            int range = str.Length - key.ToString().Length;
+            char[] array = str.ToArray();
+            int index = 0; string result = "";
+            while (index < range)
+            {
+                result += array[index].ToString();
+                index++;
+            }
+            result += key;
+            return result;
+        }
+
+        //取得該標籤歷史當天的紀錄
+        //ins_date 列印日期
+        //rules_code 流水號編碼原則
+        //LabelCode 標籤種類
+        //RunNumber 有幾筆資料，累加數量
+        public int getPrt_cnt有編碼格式(string ins_date, string rules_code, string LabelCode, int RunNumber)
+        {
+            rules_code = rules_code.Replace("'", "");
+            Comm comm = new Comm();
+            string sSql = @$" DECLARE @Columns VARCHAR(MAX)
+                                        DECLARE @JsonValue VARCHAR(MAX)
+
+                                        SELECT @Columns = COALESCE(@Columns + ',' + 
+				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,''), 
+				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,'')) 
+                                        from PRT02_0000 where ins_date = {ins_date} and (print_data like '%{LabelCode}%' 
+                                                                and REPLACE(print_data, '''' ,'') like '%{rules_code}%') ;
+                                        SET @JsonValue = '['+ @Columns+']'; -- 將Json 
+
+                                        SELECT sum(prt_cnt) as prt_cnt FROM OPENJSON(@JsonValue)
+                                        WITH(
+	                                        prt_cnt int '$.prt_cnt'
+                                        )";
+            var data = comm.Get_DataTable(sSql, "MES");
+
+            int Oldprt_cnt = comm.String_ParseInt32(Get_DataTableValue(data, "prt_cnt"));
+            Oldprt_cnt = Oldprt_cnt + RunNumber;
+            return Oldprt_cnt;
+        }
+
+
+        //取得該標籤歷史當天的紀錄(無特別輸入編碼)
+        //ins_date 列印日期
+        //rules_code 流水號編碼原則
+        //LabelCode 標籤種類
+        //RunNumber 有幾筆資料，累加數量
+        public int getPrt_cnt無編碼格式(string ins_date, string LabelCode)
+        {
+            Comm comm = new Comm();
+            string sSql = @$" DECLARE @Columns VARCHAR(MAX)
+                                        DECLARE @JsonValue VARCHAR(MAX)
+
+                                        SELECT @Columns = COALESCE(@Columns + ',' + 
+				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,''), 
+				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,'')) 
+                                        from PRT02_0000 where ins_date = {ins_date} and print_data like '%{LabelCode}%' ;
+                                        SET @JsonValue = '['+ @Columns+']'; -- 將Json 
+
+                                        SELECT sum(prt_cnt) as prt_cnt FROM OPENJSON(@JsonValue)
+                                        WITH(
+	                                        prt_cnt int '$.prt_cnt'
+                                        )";
+            var data = comm.Get_DataTable(sSql, "MES");
+
+            int Oldprt_cnt = comm.String_ParseInt32(Get_DataTableValue(data, "prt_cnt"));
+            Oldprt_cnt = Oldprt_cnt + 1;
+            return Oldprt_cnt;
         }
 
 
@@ -332,7 +459,6 @@ namespace PRT_DTS
             }
             return NewValue;
         }
-
 
         /// <summary>
         /// 取得小數點位數

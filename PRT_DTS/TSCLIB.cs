@@ -12,6 +12,7 @@ namespace PRT_DTS
 {
     public class TSCLIB
     {
+        public string _error { get; set; }
         #region TSCLIB_函數內容
         [DllImport("TSCLIB.dll", EntryPoint = "about")]
         public static extern int about();
@@ -72,91 +73,54 @@ namespace PRT_DTS
         public static extern int usbprinterserial();
         #endregion
         Comm _comm = new Comm();
-        public void Command(string name, string txt)
+        public void Command(string txt)
         {
-            openport(name);
             sendcommand(txt);
+            printlabel("1", "1");
             closeport();
         }
 
         public void Print_LabelsData(PRT01_0000 pRT)
         {
-            DataTable dataTable = JsonConvert.DeserializeObject<DataTable>(pRT.PrintData);
-            openport(pRT.PrintName);//印表機名稱
-            clearbuffer();
-
-            switch (pRT.LabelCode)
+            try
             {
-                case "FOMAT"://量治具標籤作業
-                    List<string> QrCode = Get_DataTableValue_list(dataTable, "qrcode");
-                    foreach (var value in QrCode)
-                    {
-                        FOMAT_Print(value);
-                    }
-                    break;
+                DataTable dataTable = JsonConvert.DeserializeObject<DataTable>(pRT.PrintData);
 
-                case "IMG"://展會圖片
+                openport(pRT.PrintName);//印表機名稱
+                                        //Call openport(“\\server\TTP243”)開啟網路印表機
+                                        //Call openport(“LPT1”)直接開啟LPT1 傳輸埠
+                                        //Call openport(“USB”)直接開啟USB 傳輸埠
+                clearbuffer();
 
-                    IMG_Print();
-                    BARCODE(dataTable, pRT.LabelCode);
-                    break;
+                switch (pRT.LabelCode)
+                {
+                    case "FOMAT"://量治具標籤作業
+                        List<string> QrCode = _comm.Get_DataTableValue_list(dataTable, "qrcode");
+                        foreach (var value in QrCode)
+                        {
+                            FOMAT_Print(value);
+                        }
+                        break;
 
-                case "SET"://把號
+                    case "IMG"://展會圖片
 
-                    OME_SET sET = new OME_SET(); ;
-                    string insDate = Get_DataTableValue(dataTable, "ins_date");
-                    int prt_cnt = new Comm().String_ParseInt32(Get_DataTableValue(dataTable, "prt_cnt"));
-                    for (int i = 1; i <= prt_cnt; i++)
-                    {
-                        int Oldprt_cnt = getPrt_cnt有編碼格式(insDate, Get_DataTableValue(dataTable, "rules_code"), pRT.LabelCode, i);
+                        IMG_Print();
+                        BARCODE(dataTable, pRT.LabelCode);
+                        break;
 
-                        string Key = Get_RulesKey(Get_DataTableValue(dataTable, "rules_code"), Oldprt_cnt);
-                        Key = Key.Replace(" ", "");
-                        //格式'R' + yymmdd + 0000
-                        SET_Print(Key, pRT.PrintName);
-                    }
-                    break;
+                    case "SET"://把號
 
-                case "QC"://檢驗標籤
-                    QC_Print(pRT.PrintName, new OME_QC()
-                    {
-                        TZ = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "TZ")),
-                        TW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "TW")),
-                        DZ = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "DZ")),
-                        DW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "DW")),
-                        W1 = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "W1")),
-                        W2 = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "W2")),
-                        BG = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "BG")),
-                        LH = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "LH")),
-                        BW = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "BW")),
-                        PA = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "PA")),
-                        AH = _comm.Get_FloatFormat(Get_DataTableValue(dataTable, "AH")),
-                        BGR_UP = Get_DataTableValue(dataTable, "BGR_UP"),
-                        BGR_DOWN = Get_DataTableValue(dataTable, "BGR_DOWN"),
-                        FC = Get_DataTableValue(dataTable, "FC"),
-                        DG_A = Get_DataTableValue(dataTable, "DG_A"),
-                        DG_B = Get_DataTableValue(dataTable, "DG_B"),
-                        SCH = Get_DataTableValue(dataTable, "SCH"),
-                        Z1 = Get_DataTableValue(dataTable, "Z1"),
-                        Z2 = Get_DataTableValue(dataTable, "Z2"),
-                        S1_level = Get_DataTableValue(dataTable, "S1_level"),
-                        bar_code = Get_DataTableValue(dataTable, "bar_code"),
-                        qr_code = Get_DataTableValue(dataTable, "qr_code"),
-                        pro_code = Get_DataTableValue(dataTable, "pro_code"),
-                        LG = Get_DataTableValue(dataTable, "LG"),
-                        GS = Get_DataTableValue(dataTable, "GS"),
-                        AS = Get_DataTableValue(dataTable, "AS"),
-                        M = Get_DataTableValue(dataTable, "M"),
-                        N = Get_DataTableValue(dataTable, "N"),
-                        SHUL = Get_DataTableValue(dataTable, "SHUL"),
-                        second_level = Get_DataTableValue(dataTable, "second_level"),
-                        pp_level = Get_DataTableValue(dataTable, "pp_level"),
-                        A19 = Get_DataTableValue(dataTable, "A19"),
-                        A01 = Get_DataTableValue(dataTable, "A01"),
-                    });
-                    break;
+                        OME_SET sET = new OME_SET(); ;
+                        int prt_cnt = new Comm().String_ParseInt32(_comm.Get_DataTableValue(dataTable, "prt_cnt"));
+                        SET_Print(dataTable, prt_cnt, pRT.LabelCode);
+                        break;
+
+                    case "QC"://檢驗標籤
+                        QC_Print(pRT.PrintName, new OME_QC().GetOME_QC_data(dataTable));
+                        break;
+                }
             }
-
+            catch (Exception ex) { _error = ex.Message; }
             /*--------執行向上-----------*/
         }
         /*----------------測試區向下-----------------*/
@@ -208,58 +172,56 @@ namespace PRT_DTS
                 TEXT 840, 160, ""ROMAN.TTF"", 0, 8, 8, ""{qC.LG}""
                 TEXT 840, 200, ""ROMAN.TTF"", 0, 8, 8, ""{qC.BW}""
             ";
-
-            sendcommand(FormatCommand);//设置相对起点
-            printlabel("1", "1");
-            closeport();
+            Command(FormatCommand);
         }
 
-        public void SET_Print(string rules_code, string PrinerName)
+        public void SET_Print(DataTable dataTable, int prt_cnt, string LabelCode)
         {
-            string QrCode = rules_code;
+            string insDate = _comm.Get_DataTableValue(dataTable, "ins_date");
+            string rules_code = _comm.Get_DataTableValue(dataTable, "rules_code");
 
-            string FormatCommand = @$"
+            for (int i = 1; i <= prt_cnt; i++)
+            {
+                int Oldprt_cnt = _comm.getPrt_cnt有編碼格式(insDate, rules_code, LabelCode, i);
+
+                rules_code = _comm.Get_RulesKey(rules_code, Oldprt_cnt);
+                rules_code = rules_code.Replace(" ", "");
+                //格式'R' + yymmdd + 0000
+
+                string FormatCommand = @$"
                 SIZE 60 mm, 75 mm
                 GAP 0,0
                 DIRECTION 1
                 CLS
-                QRCODE 430, 600, L, 10, A, 0, M2, X250, J5, ""{QrCode}""
-                TEXT 280,720, ""0"", 0, 12, 12, ""{QrCode}""
-        ";
-            sendcommand(FormatCommand);//设置相对起点
-            printlabel("1", "1");
+                QRCODE 430, 600, L, 10, A, 0, M2, X250, J5, ""{rules_code}""
+                TEXT 280,720, ""0"", 0, 12, 12, ""{rules_code}""";
+
+                sendcommand(FormatCommand);//设置相对起点
+                printlabel("1", "1");
+            }
             closeport();
-
-
-
         }
 
         public void FOMAT_Print(string value) //量至距
         {
-
-            string FormatCommand = @$" SIZE 101 mm, 50mm
-                GAP 0,0
-                SPEED 1
-                DIRECTION 1
-                CLS
+            string FormatCommand = @$" 
+              SIZE 101 mm, 50mm
+              GAP 0,0
+              SPEED 1
+              DIRECTION 1
+              CLS
               DIAGONAL 800,  20, 800, 400, 3
               DIAGONAL 1100,  20, 1100, 400, 3
-
               DIAGONAL 800,  20, 1100, 20, 3
               DIAGONAL 800,  400, 1100, 400, 3
+              QRCODE 865, 90, L, 8, A, 0, M2, X150, J1, ""{value}""
+              TEXT 850,280, ""0"", 0, 12, 12, ""{value}""";
 
-             QRCODE 865, 90, L, 8, A, 0, M2, X150, J1, ""{value}""
-
-                TEXT 850,280, ""0"", 0, 12, 12, ""{value}""";
-
-            sendcommand(FormatCommand);//设置相对起点
-            printlabel("1", "1");
-            closeport();
+            Command(FormatCommand);
         }
 
         public void IMG_Print() //下LINQ查詢語法抓prt01
         {
-
             downloadpcx(@"C:\Users\howard.chu\Desktop\img\TEST1.pcx", "BMP.PCX");
             string FormatCommand = @$"
                 SIZE 101 mm, 101mm
@@ -269,20 +231,17 @@ namespace PRT_DTS
                 CLS
                 PUTPCX 68,20,""BMP.PCX""
                ";
-
-            sendcommand(FormatCommand);//设置相对起点
-            printlabel("1", "1");
-            closeport();
+            Command(FormatCommand);
         }
 
         public void BARCODE(DataTable dataTable, string LabelCode) //下LINQ查詢語法抓prt01
         {
-            string insDate = Get_DataTableValue(dataTable, "ins_date");
-            int Oldprt_cnt = getPrt_cnt無編碼格式(insDate, LabelCode);
-            string ReelID = Get_RulesKey("'6971TW'+yyyyMMdd+000+'JS291843A'", Oldprt_cnt);
+            string insDate = _comm.Get_DataTableValue(dataTable, "ins_date");
+            int Oldprt_cnt = _comm.getPrt_cnt無編碼格式(insDate, LabelCode);
+            string ReelID = _comm.Get_RulesKey("'6971TW'+yyyyMMdd+000+'JS291843A'", Oldprt_cnt);
             ReelID = ReelID.Replace(" ", "");
 
-            string DateCode = Get_RulesKey("yyyyMMdd+0000", Oldprt_cnt);
+            string DateCode = _comm.Get_RulesKey("yyyyMMdd+0000", Oldprt_cnt);
             DateCode = DateCode.Replace(" ", "");
 
             string FormatCommand = @$"
@@ -311,91 +270,28 @@ namespace PRT_DTS
                 TEXT 800, 950, ""2"", 0, 3, 3, ""METAiM""
                ";
 
-            sendcommand(FormatCommand);//设置相对起点
-            printlabel("1", "1");
-            closeport();
-
-
+            Command(FormatCommand);
         }
 
-        public void Test_Print()
+        public bool Test_Print()
         {
-
-            string Key = Get_RulesKey("'PUME'+yymmdd+'-'+0000", 1);
-            string FormatCommand = @$"
+            try
+            {
+                string Key = _comm.Get_RulesKey("'PUME'+yymmdd+'-'+0000", 1);
+                string FormatCommand = @$"
                     QRCODE 430, 280, L, 8, A, 0, M2, X250, J5, ""{Key}""
                     TEXT 250,380, ""0"", 0, 12, 12, ""{Key}""
                     PRINT 1,1
                     CLS
                 ";
-            sendcommand(FormatCommand);//设置相对起点
-            printlabel("1", "1");
-            closeport();
-        }
-
-
-        private string Get_DataTableValue(DataTable data, string searchName)
-        {
-            List<string> colItem = data.Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToList();
-            string colName = searchName.Trim();
-            return colItem.Where(x => x == colName).Any() ?
-                data.AsEnumerable().Select(row => row[colName].ToString()).FirstOrDefault()
-                : "";
-        }
-
-        private List<string> Get_DataTableValue_list(DataTable data, string searchName)
-        {
-            List<string> colItem = data.Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToList();
-            string colName = searchName.Trim();
-            List<string> list = colItem.Where(x => x == colName).Any() ?
-                data.AsEnumerable().Select(row => row[colName].ToString()).ToList()
-                : new List<string>();
-            return list;
-        }
-
-
-        private string Get_RulesKey(string rules, int index)
-        {
-            List<string> Item = rules.Split('+').ToList();
-            string result = "";
-            foreach (string str in Item)
-            {
-                if (str.Contains("'"))
-                {
-                    result += str.Replace("'", "");
-                    continue;
-                }
-
-                int outResult;
-                if (int.TryParse(str, out outResult))
-                {
-                    string Key = Get_ScrNo(index, str);
-                    result += Key;
-                    continue;
-                }
-
-                string date = DateTime.Now.ToString(str);
-                result += date;
+                Command(FormatCommand);
+                return true;
             }
-            return result;
+            catch { return false; }
+
         }
 
         #region Private Function
-
-        private string Get_ScrNo(int key, string str)
-        {
-            int range = str.Length - key.ToString().Length;
-            char[] array = str.ToArray();
-            int index = 0; string result = "";
-            while (index < range)
-            {
-                result += array[index].ToString();
-                index++;
-            }
-            result += key;
-            return result;
-        }
-
 
         /// <summary>
         /// 讀取印表機資訊
@@ -498,62 +394,6 @@ namespace PRT_DTS
                 QRCODE 320,980,H,4,B,0,M2,S7, ""testQrCode""";
             sendcommand(commandString);
         }
-
-        public string Get_RulesValue(string rules)
-        {
-            string a = "";
-            return a;
-        }
-
-        public int getPrt_cnt有編碼格式(string ins_date, string rules_code, string LabelCode, int RunNumber)
-        {
-            rules_code = rules_code.Replace("'", "");
-            Comm comm = new Comm();
-            string sSql = @$" DECLARE @Columns VARCHAR(MAX)
-                                        DECLARE @JsonValue VARCHAR(MAX)
-
-                                        SELECT @Columns = COALESCE(@Columns + ',' + 
-				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,''), 
-				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,'')) 
-                                        from PRT02_0000 where ins_date = {ins_date} and (print_data like '%{LabelCode}%' 
-                                                                and REPLACE(print_data, '''' ,'') like '%{rules_code}%') ;
-                                        SET @JsonValue = '['+ @Columns+']'; -- 將Json 
-
-                                        SELECT sum(prt_cnt) as prt_cnt FROM OPENJSON(@JsonValue)
-                                        WITH(
-	                                        prt_cnt int '$.prt_cnt'
-                                        )";
-            var data = comm.Get_DataTable(sSql, "MES");
-
-            int Oldprt_cnt = comm.String_ParseInt32(Get_DataTableValue(data, "prt_cnt"));
-            Oldprt_cnt = Oldprt_cnt + RunNumber;
-            return Oldprt_cnt;
-        }
-
-        public int getPrt_cnt無編碼格式(string ins_date, string LabelCode)
-        {
-            Comm comm = new Comm();
-            string sSql = @$" DECLARE @Columns VARCHAR(MAX)
-                                        DECLARE @JsonValue VARCHAR(MAX)
-
-                                        SELECT @Columns = COALESCE(@Columns + ',' + 
-				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,''), 
-				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,'')) 
-                                        from PRT02_0000 where ins_date = {ins_date} and print_data like '%{LabelCode}%' ;
-                                        SET @JsonValue = '['+ @Columns+']'; -- 將Json 
-
-                                        SELECT sum(prt_cnt) as prt_cnt FROM OPENJSON(@JsonValue)
-                                        WITH(
-	                                        prt_cnt int '$.prt_cnt'
-                                        )";
-            var data = comm.Get_DataTable(sSql, "MES");
-
-            int Oldprt_cnt = comm.String_ParseInt32(Get_DataTableValue(data, "prt_cnt"));
-            Oldprt_cnt = Oldprt_cnt + 1;
-            return Oldprt_cnt;
-        }
-
-
         #endregion
     }
 }

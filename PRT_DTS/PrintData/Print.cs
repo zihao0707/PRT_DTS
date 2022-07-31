@@ -47,5 +47,7 @@ namespace PRT_DTS.PrintData
             public string pro_qty { get; set; }
             public string lot_no { get; set; }
         }
+
+
     }
 }

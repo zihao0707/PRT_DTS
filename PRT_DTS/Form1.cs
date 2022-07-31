@@ -28,7 +28,8 @@ namespace PRT_DTS
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var prtData = Get_prtData();
+            if (!new TSCLIB().Test_Print()) { label3.Text = ""; };
+            Get_prtData();
            
         }
 
@@ -39,7 +40,9 @@ namespace PRT_DTS
         /// <returns></returns>
         private string Get_prtData()
         {
-            string sSQL = @$"select top 1 * FROM PRT01_0000 WHERE  usr_code = {MACAddress.Text}";//取得列印資料
+            string sSQL = @$"select top 1 * FROM PRT01_0000 
+                                WHERE  usr_code = {MACAddress.Text} 
+                                   and print_name ={printName.Text}";//取得列印資料
 
             DataTable prtData = new Comm().Get_DataTable(sSQL, "MES");
             if (prtData.Rows.Count == 0) { return "無資料"; }
@@ -59,6 +62,31 @@ namespace PRT_DTS
             new TSCLIB().Print_LabelsData(prt);
 
             return "列印完畢";
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            new TSCLIB()._error = "";
+            timer1.Enabled = true;
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            
+            string err = new TSCLIB()._error.ToString().Length>1
+                ? new TSCLIB()._error
+                : "";
+            if (err.Length>1) {
+                MessageBox.Show(err);
+                timer1.Enabled = false;
+            }
+            
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            string sSql = @"delete PRT01_0000";
+            new Comm().SaveSQL(sSql, "MES");
         }
     }
 }

@@ -33,13 +33,14 @@ namespace PRT_DTS
             this.button1 = new System.Windows.Forms.Button();
             this.MACAddress = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.printName = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // button1
@@ -71,16 +72,6 @@ namespace PRT_DTS
             this.label1.TabIndex = 2;
             this.label1.Text = "配對碼";
             // 
-            // button2
-            // 
-            this.button2.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button2.Location = new System.Drawing.Point(287, 137);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(156, 54);
-            this.button2.TabIndex = 3;
-            this.button2.Text = "重新啟動";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
             // button3
             // 
             this.button3.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -90,6 +81,7 @@ namespace PRT_DTS
             this.button3.TabIndex = 4;
             this.button3.Text = "清除資料";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click_1);
             // 
             // label2
             // 
@@ -97,29 +89,29 @@ namespace PRT_DTS
             this.label2.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label2.Location = new System.Drawing.Point(12, 217);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(197, 38);
+            this.label2.Size = new System.Drawing.Size(167, 38);
             this.label2.TabIndex = 5;
-            this.label2.Text = "印表機狀態：";
+            this.label2.Text = "列印狀態：";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(192, 219);
+            this.label3.Location = new System.Drawing.Point(164, 217);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 38);
             this.label3.TabIndex = 6;
             this.label3.Text = "待機";
             // 
-            // textBox2
+            // printName
             // 
-            this.textBox2.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textBox2.Location = new System.Drawing.Point(182, 73);
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(215, 51);
-            this.textBox2.TabIndex = 7;
-            this.textBox2.Text = "TSC TTP-345";
+            this.printName.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.printName.Location = new System.Drawing.Point(182, 73);
+            this.printName.Multiline = true;
+            this.printName.Name = "printName";
+            this.printName.Size = new System.Drawing.Size(215, 51);
+            this.printName.TabIndex = 7;
+            this.printName.Text = "TSC TTP-345";
             // 
             // label4
             // 
@@ -131,13 +123,28 @@ namespace PRT_DTS
             this.label4.TabIndex = 8;
             this.label4.Text = "印表機名稱";
             // 
+            // button2
+            // 
+            this.button2.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.button2.Location = new System.Drawing.Point(287, 137);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(156, 54);
+            this.button2.TabIndex = 3;
+            this.button2.Text = "重新啟動";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // timer2
+            // 
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(775, 287);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.printName);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.button3);
@@ -158,13 +165,14 @@ namespace PRT_DTS
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox MACAddress;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox printName;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Timer timer2;
     }
 }
 
