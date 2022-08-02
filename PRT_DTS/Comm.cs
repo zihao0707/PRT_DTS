@@ -80,11 +80,14 @@ namespace PRT_DTS
             {
                 try
                 {
-                    SqlConnection con_db = Set_DBConnection(sConnect);
-                    con_db.Open();
-                    SqlCommand cmd = new SqlCommand(pSql);
-                    cmd.ExecuteNonQuery();
-                    con_db.Close();
+                    using (SqlConnection con_db = Set_DBConnection(sConnect))
+                    {
+                        con_db.Open();
+                        SqlCommand sqlCommand = new SqlCommand(pSql);
+                        sqlCommand.Connection = con_db;
+                        sqlCommand.ExecuteNonQuery();
+                        con_db.Close();
+                    }
                 }
                 catch (Exception ex) { }
             }

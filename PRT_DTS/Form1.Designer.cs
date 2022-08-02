@@ -56,6 +56,7 @@ namespace PRT_DTS
             // 
             // MACAddress
             // 
+            this.MACAddress.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.MACAddress.Location = new System.Drawing.Point(125, 12);
             this.MACAddress.Multiline = true;
             this.MACAddress.Name = "MACAddress";
@@ -113,6 +114,7 @@ namespace PRT_DTS
             // 
             // printName
             // 
+            this.printName.BackColor = System.Drawing.SystemColors.Window;
             this.printName.Font = new System.Drawing.Font("Microsoft JhengHei UI", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.printName.Location = new System.Drawing.Point(182, 73);
             this.printName.Multiline = true;

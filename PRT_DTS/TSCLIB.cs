@@ -101,6 +101,9 @@ namespace PRT_DTS
                             FOMAT_Print(value);
                         }
                         break;
+                    case "PRO"://測試列印
+                        PRO_TEST_Print("");
+                        break;
 
                     case "IMG"://展會圖片
 
@@ -109,10 +112,13 @@ namespace PRT_DTS
                         break;
 
                     case "SET"://把號
-
-                        OME_SET sET = new OME_SET(); ;
+                        
+                       OME_SET sET = new OME_SET(); ;
                         int prt_cnt = new Comm().String_ParseInt32(_comm.Get_DataTableValue(dataTable, "prt_cnt"));
-                        SET_Print(dataTable, prt_cnt, pRT.LabelCode);
+                        for (int i = 1; i <= prt_cnt; i++)
+                        {
+                            SET_Print(dataTable, i, pRT.LabelCode);
+                        }
                         break;
 
                     case "QC"://檢驗標籤
@@ -174,16 +180,15 @@ namespace PRT_DTS
             ";
             Command(FormatCommand);
         }
-
+        
         public void SET_Print(DataTable dataTable, int prt_cnt, string LabelCode)
         {
-            openport("TSC TTP-345");
+            
             string insDate = _comm.Get_DataTableValue(dataTable, "ins_date");
             string rules_code = _comm.Get_DataTableValue(dataTable, "rules_code");
 
-            for (int i = 1; i <= prt_cnt; i++)
-            {
-                int Oldprt_cnt = _comm.getPrt_cnt有編碼格式(insDate, rules_code, LabelCode, i);
+                openport("TSC TTP-345");
+                int Oldprt_cnt = _comm.getPrt_cnt有編碼格式(insDate, rules_code, LabelCode, prt_cnt);
 
                 rules_code = _comm.Get_RulesKey(rules_code, Oldprt_cnt);
                 rules_code = rules_code.Replace(" ", "");
@@ -199,11 +204,29 @@ namespace PRT_DTS
 
                 sendcommand(FormatCommand);//设置相对起点
                 printlabel("1", "1");
-            }
-            closeport();
+                closeport();
+            
         }
 
         public void FOMAT_Print(string value) //量至距
+        {
+            string FormatCommand = @$" 
+              SIZE 101 mm, 50mm
+              GAP 0,0
+              SPEED 1
+              DIRECTION 1
+              CLS
+              DIAGONAL 800,  20, 800, 400, 3
+              DIAGONAL 1100,  20, 1100, 400, 3
+              DIAGONAL 800,  20, 1100, 20, 3
+              DIAGONAL 800,  400, 1100, 400, 3
+              QRCODE 865, 90, L, 8, A, 0, M2, X150, J1, ""{value}""
+              TEXT 850,280, ""0"", 0, 12, 12, ""{value}""";
+
+            Command(FormatCommand);
+        }
+
+        public void PRO_TEST_Print(string value) //量至距
         {
             string FormatCommand = @$" 
               SIZE 101 mm, 50mm

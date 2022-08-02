@@ -28,9 +28,7 @@ namespace PRT_DTS
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!new TSCLIB().Test_Print()) { label3.Text = ""; };
-           
-           
+            new TSCLIB().Test_Print();
         }
 
         /// <summary>
@@ -65,12 +63,6 @@ namespace PRT_DTS
             Del_prtData(prt);
             return "列印完畢";
         }
-
-        /// <summary>
-        /// 取得一筆列印資料
-        /// </summary>
-        /// <param MACAddress.Text>配對碼</param>
-        /// <returns></returns>
         private bool Del_prtData(PRT01_0000 pRT)
         {
             new Comm().Del_QueryData("PRT01_0000", "prt01_0000", new Comm().ParseString(pRT.Prt0100001),"MES");
