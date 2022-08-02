@@ -29,7 +29,7 @@ namespace PRT_DTS
         private void button1_Click(object sender, EventArgs e)
         {
             if (!new TSCLIB().Test_Print()) { label3.Text = ""; };
-            Get_prtData();
+           
            
         }
 
@@ -41,8 +41,8 @@ namespace PRT_DTS
         private string Get_prtData()
         {
             string sSQL = @$"select top 1 * FROM PRT01_0000 
-                                WHERE  usr_code = {MACAddress.Text} 
-                                   and print_name ={printName.Text}";//取得列印資料
+                                WHERE  usr_code = '{MACAddress.Text}'";
+                                   //and print_name ='{printName.Text}';//取得列印資料
 
             DataTable prtData = new Comm().Get_DataTable(sSQL, "MES");
             if (prtData.Rows.Count == 0) { return "無資料"; }
@@ -61,12 +61,21 @@ namespace PRT_DTS
 
             new TSCLIB().Print_LabelsData(prt);
             DataTable insData = new DataTable();
-           var result = new PRT02_0000().insPRT02_0000(prt);
-           new Comm().Insert_DB_Table(result,"PRT02_0000","MES");
+            new Comm().ins_PRT02_0000(prt,"MES");
+            Del_prtData(prt);
             return "列印完畢";
         }
 
-       
+        /// <summary>
+        /// 取得一筆列印資料
+        /// </summary>
+        /// <param MACAddress.Text>配對碼</param>
+        /// <returns></returns>
+        private bool Del_prtData(PRT01_0000 pRT)
+        {
+            new Comm().Del_QueryData("PRT01_0000", "prt01_0000", new Comm().ParseString(pRT.Prt0100001),"MES");
+            return true;
+        }
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -91,6 +100,11 @@ namespace PRT_DTS
         {
             string sSql = @"delete PRT01_0000";
             new Comm().SaveSQL(sSql, "MES");
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            Get_prtData();
         }
     }
 }

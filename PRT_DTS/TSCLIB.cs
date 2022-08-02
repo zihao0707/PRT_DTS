@@ -75,6 +75,11 @@ namespace PRT_DTS
         Comm _comm = new Comm();
         public void Command(string txt)
         {
+            openport("TSC TTP-345");//印表機名稱
+                                    //Call openport(“\\server\TTP243”)開啟網路印表機
+                                    //Call openport(“LPT1”)直接開啟LPT1 傳輸埠
+                                    //Call openport(“USB”)直接開啟USB 傳輸埠
+            clearbuffer();
             sendcommand(txt);
             printlabel("1", "1");
             closeport();
@@ -86,11 +91,6 @@ namespace PRT_DTS
             {
                 DataTable dataTable = JsonConvert.DeserializeObject<DataTable>(pRT.PrintData);
 
-                openport(pRT.PrintName);//印表機名稱
-                                        //Call openport(“\\server\TTP243”)開啟網路印表機
-                                        //Call openport(“LPT1”)直接開啟LPT1 傳輸埠
-                                        //Call openport(“USB”)直接開啟USB 傳輸埠
-                clearbuffer();
                 /*--------標籤種類向下-----------*/
                 switch (pRT.LabelCode)
                 {
@@ -177,6 +177,7 @@ namespace PRT_DTS
 
         public void SET_Print(DataTable dataTable, int prt_cnt, string LabelCode)
         {
+            openport("TSC TTP-345");
             string insDate = _comm.Get_DataTableValue(dataTable, "ins_date");
             string rules_code = _comm.Get_DataTableValue(dataTable, "rules_code");
 
@@ -222,6 +223,7 @@ namespace PRT_DTS
 
         public void IMG_Print() //下LINQ查詢語法抓prt01
         {
+            openport("TSC TTP-345");
             downloadpcx(@"C:\Users\howard.chu\Desktop\img\TEST1.pcx", "BMP.PCX");
             string FormatCommand = @$"
                 SIZE 101 mm, 101mm
@@ -231,7 +233,8 @@ namespace PRT_DTS
                 CLS
                 PUTPCX 68,20,""BMP.PCX""
                ";
-            Command(FormatCommand);
+            sendcommand(FormatCommand);
+            printlabel("1", "1");
         }
 
         public void BARCODE(DataTable dataTable, string LabelCode) //下LINQ查詢語法抓prt01

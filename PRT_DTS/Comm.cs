@@ -36,9 +36,9 @@ namespace PRT_DTS
                 case "MES":
                     connection = Value_解密(_DbConntion_MES);
                     break;
-                //case "WMS":
-                //    connection = Value_解密(_DbConntion_WMS);
-                //    break;
+                    //case "WMS":
+                    //    connection = Value_解密(_DbConntion_WMS);
+                    //    break;
             }
 
             SqlConnection Connection_Db = new SqlConnection(connection);
@@ -66,7 +66,7 @@ namespace PRT_DTS
                 }
                 return datatable;
             }
-            catch (Exception) { throw; }
+            catch (Exception ex) { throw; }
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace PRT_DTS
                     cmd.ExecuteNonQuery();
                     con_db.Close();
                 }
-                catch { }
+                catch (Exception ex) { }
             }
         }
 
@@ -167,6 +167,28 @@ namespace PRT_DTS
             return list;
         }
 
+        /// <summary>
+        /// 執行單一刪除語法
+        /// </summary>
+        /// <param name="pTableCode">執行刪除的目標Table</param>
+        /// <param name="pKeyCode">鍵值欄位</param>
+        /// <param name="pKeyValue">鍵值</param>
+        public void Del_QueryData(string pTableCode, string pKeyCode, string pKeyValue, string sConnect)
+        {
+            string sSql = " DELETE " + pTableCode +
+                          "  WHERE " + pKeyCode + "   = @" + pKeyCode;
+            using (SqlConnection con_db = Set_DBConnection(sConnect))
+            {
+                con_db.Open();
+                SqlCommand sqlCommand = new SqlCommand(sSql);
+                sqlCommand.Connection = con_db;
+                sqlCommand.Parameters.Add(new SqlParameter(pKeyCode, pKeyValue));
+                sqlCommand.ExecuteNonQuery();
+                con_db.Close();
+            }
+        }
+
+
 
 
         /// <summary>
@@ -228,6 +250,39 @@ namespace PRT_DTS
             return result;
         }
 
+        public bool ins_PRT02_0000(PRT01_0000 prt, string sConnect)
+        {
+
+            PRT02_0000 prt02 = new PRT02_0000();
+            prt02.prt02_0000 = new Comm().Get_NewGUID();
+            prt02.prt_type = prt.PrtType;
+            prt02.prt_kind = prt.PrtKind;
+            prt02.print_name = prt.PrintName;
+            prt02.print_data = prt.PrintData.Replace("'","''");
+            prt02.result = "OK";
+            prt02.usr_code = prt.UsrCode;
+            prt02.ins_date = DateTime.Now.ToString("yyyy-MM-dd");
+            prt02.ins_time = DateTime.Now.ToString("HH:mm:ss");
+            prt02.prt_date = DateTime.Now.ToString("yyyy-MM-dd");
+            prt02.prt_time = DateTime.Now.ToString("HH:mm:ss");
+
+            string insSql = @$"INSERT INTO PRT02_0000 VALUES (
+                            '{prt02.prt02_0000}','{ prt02.prt_type}','{prt02.prt_kind}',
+                            '{prt02.print_name}','{prt02.print_data}',
+                            '{prt02.result}','','{ prt02.ins_date}','{prt02.ins_time}',
+                            '{prt02.usr_code}','{prt02.prt_date}','{prt02.prt_time}','','')";
+
+            using (SqlConnection con_db = Set_DBConnection(sConnect))
+            {
+                con_db.Open();
+                SqlCommand sqlCommand = new SqlCommand(insSql);
+                sqlCommand.Connection = con_db;
+                sqlCommand.ExecuteNonQuery();
+                con_db.Close();
+            }
+            return true;
+        }
+
         //取得該標籤歷史當天的紀錄
         //ins_date 列印日期
         //rules_code 流水號編碼原則
@@ -243,7 +298,7 @@ namespace PRT_DTS
                                         SELECT @Columns = COALESCE(@Columns + ',' + 
 				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,''), 
 				                                          REPLACE(REPLACE(print_data, '[' ,''), ']' ,'')) 
-                                        from PRT02_0000 where ins_date = {ins_date} and (print_data like '%{LabelCode}%' 
+                                        from PRT02_0000 where ins_date = '{ins_date}' and (print_data like '%{LabelCode}%' 
                                                                 and REPLACE(print_data, '''' ,'') like '%{rules_code}%') ;
                                         SET @JsonValue = '['+ @Columns+']'; -- 將Json 
 

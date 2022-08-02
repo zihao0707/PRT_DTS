@@ -19,23 +19,7 @@ namespace PRT_DTS.PrintData
         public string prt_time { get; set; }
 
 
-        public PRT02_0000 insPRT02_0000(PRT01_0000 prt)
-        {
-            PRT02_0000 prt02 = new PRT02_0000();
-            prt02.prt02_0000 = new Comm().Get_NewGUID();
-            prt02.prt_type = prt.PrtType;
-            prt02.prt_kind = prt.PrtKind;
-            prt02.print_name = prt.PrintName;
-            prt02.print_data = prt.PrintData;
-            prt02.usr_code = prt.UsrCode;
-            prt02.result = "OK";
-            prt02.ins_date = DateTime.Now.ToString("yyyy-MM-dd");
-            prt02.ins_time = DateTime.Now.ToString("HH:mm:ss");
-            prt02.prt_date = DateTime.Now.ToString("yyyy-MM-dd");
-            prt02.prt_time = DateTime.Now.ToString("HH:mm:ss");
-
-            return prt02;
-        }
+       
 
     }
 }

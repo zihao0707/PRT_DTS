@@ -92,6 +92,7 @@ namespace PRT_DTS
             this.label2.Size = new System.Drawing.Size(167, 38);
             this.label2.TabIndex = 5;
             this.label2.Text = "列印狀態：";
+            this.label2.Visible = false;
             // 
             // label3
             // 
@@ -102,6 +103,13 @@ namespace PRT_DTS
             this.label3.Size = new System.Drawing.Size(77, 38);
             this.label3.TabIndex = 6;
             this.label3.Text = "待機";
+            this.label3.Visible = false;
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // printName
             // 
