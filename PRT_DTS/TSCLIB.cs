@@ -102,7 +102,7 @@ namespace PRT_DTS
                         }
                         break;
                     case "PRO"://測試列印
-                        PRO_TEST_Print("");
+                        PRO_TEST_Print();
                         break;
 
                     case "IMG"://展會圖片
@@ -112,8 +112,8 @@ namespace PRT_DTS
                         break;
 
                     case "SET"://把號
-                        
-                       OME_SET sET = new OME_SET(); ;
+
+                        OME_SET sET = new OME_SET(); ;
                         int prt_cnt = new Comm().String_ParseInt32(_comm.Get_DataTableValue(dataTable, "prt_cnt"));
                         for (int i = 1; i <= prt_cnt; i++)
                         {
@@ -180,21 +180,21 @@ namespace PRT_DTS
             ";
             Command(FormatCommand);
         }
-        
+
         public void SET_Print(DataTable dataTable, int prt_cnt, string LabelCode)
         {
-            
+
             string insDate = _comm.Get_DataTableValue(dataTable, "ins_date");
             string rules_code = _comm.Get_DataTableValue(dataTable, "rules_code");
 
-                openport("TSC TTP-345");
-                int Oldprt_cnt = _comm.getPrt_cnt有編碼格式(insDate, rules_code, LabelCode, prt_cnt);
+            openport("TSC TTP-345");
+            int Oldprt_cnt = _comm.getPrt_cnt有編碼格式(insDate, rules_code, LabelCode, prt_cnt);
 
-                rules_code = _comm.Get_RulesKey(rules_code, Oldprt_cnt);
-                rules_code = rules_code.Replace(" ", "");
-                //格式'R' + yymmdd + 0000
+            rules_code = _comm.Get_RulesKey(rules_code, Oldprt_cnt);
+            rules_code = rules_code.Replace(" ", "");
+            //格式'R' + yymmdd + 0000
 
-                string FormatCommand = @$"
+            string FormatCommand = @$"
                 SIZE 60 mm, 75 mm
                 GAP 0,0
                 DIRECTION 1
@@ -202,10 +202,10 @@ namespace PRT_DTS
                 QRCODE 430, 600, L, 10, A, 0, M2, X250, J5, ""{rules_code}""
                 TEXT 280,720, ""0"", 0, 12, 12, ""{rules_code}""";
 
-                sendcommand(FormatCommand);//设置相对起点
-                printlabel("1", "1");
-                closeport();
-            
+            sendcommand(FormatCommand);//设置相对起点
+            printlabel("1", "1");
+            closeport();
+
         }
 
         public void FOMAT_Print(string value) //量至距
@@ -226,20 +226,15 @@ namespace PRT_DTS
             Command(FormatCommand);
         }
 
-        public void PRO_TEST_Print(string value) //量至距
+        public void PRO_TEST_Print() //量至距
         {
             string FormatCommand = @$" 
-              SIZE 101 mm, 50mm
+              SIZE 101 mm, 101mm
               GAP 0,0
               SPEED 1
               DIRECTION 1
               CLS
-              DIAGONAL 800,  20, 800, 400, 3
-              DIAGONAL 1100,  20, 1100, 400, 3
-              DIAGONAL 800,  20, 1100, 20, 3
-              DIAGONAL 800,  400, 1100, 400, 3
-              QRCODE 865, 90, L, 8, A, 0, M2, X150, J1, ""{value}""
-              TEXT 850,280, ""0"", 0, 12, 12, ""{value}""";
+              TEXT 850,280, ""0"", 0, 12, 12, ""測試列印""";
 
             Command(FormatCommand);
         }

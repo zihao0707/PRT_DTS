@@ -572,9 +572,8 @@ namespace PRT_DTS
             decimal oDecimal;
             if (!num.Contains('.')) { num += ".0"; }
             if (!decimal.TryParse(num, out oDecimal)) { return num; }
-            decimal before = decimal.Parse(num);
-
-            return decimal.Round(before, digits).ToString();
+            decimal before = decimal.Parse(num);    
+            return Math.Round(before, digits, MidpointRounding.AwayFromZero).ToString(); ;
         }
         public string ParseString(object pValue) => pValue.ToString() ?? "";
         public Int32 String_ParseInt32(string pValue) => Int32.TryParse(pValue, out Int32 result) ? result : 0;
